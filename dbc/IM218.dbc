@@ -1,0 +1,242 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: ECU ECM
+
+
+BO_ 448 CeusAMcan_iOutV: 4 ECU
+ SG_ sensor_command : 16|16@1+ (1,0) [0|65535] ""  ECU
+
+BO_ 320 CeusAMcan_iOutDuty: 8 ECU
+ SG_ combine_duty_4 : 56|8@1+ (1,0) [0|255] ""  ECU
+ SG_ combine_duty_3 : 48|8@1+ (1,0) [0|255] ""  ECU
+ SG_ combine_duty_2 : 40|8@1+ (1,0) [0|255] ""  ECU
+ SG_ combine_duty_1 : 32|8@1+ (1,0) [0|255] ""  ECU
+ SG_ combine_duty_0 : 24|8@1+ (1,0) [0|255] ""  ECU
+ SG_ combined_count : 20|4@1+ (1,0) [0|15] ""  ECU
+ SG_ combine_index_2 : 8|4@1+ (1,0) [0|15] ""  ECU
+ SG_ combine_index_4 : 16|4@1+ (1,0) [0|15] ""  ECU
+ SG_ combine_index_3 : 12|4@1+ (1,0) [0|15] ""  ECU
+ SG_ combine_index_1 : 4|4@1+ (1,0) [0|15] ""  ECU
+ SG_ combine_index_0 : 0|4@1+ (1,0) [0|15] ""  ECU
+
+BO_ 192 CeusAMcan_iOutCmd: 8 ECU
+ SG_ il0 : 59|1@1+ (1,0) [0|1] ""  ECU
+ SG_ manage_wiper : 56|2@1+ (1,0) [0|3] ""  ECU
+ SG_ comb_ch15 : 55|1@1+ (1,0) [0|1] ""  ECU
+ SG_ comb_ch14 : 54|1@1+ (1,0) [0|1] ""  ECU
+ SG_ comb_ch13 : 53|1@1+ (1,0) [0|1] ""  ECU
+ SG_ comb_ch12 : 52|1@1+ (1,0) [0|1] ""  ECU
+ SG_ comb_ch11 : 51|1@1+ (1,0) [0|1] ""  ECU
+ SG_ comb_ch10 : 50|1@1+ (1,0) [0|1] ""  ECU
+ SG_ comb_ch9 : 49|1@1+ (1,0) [0|1] ""  ECU
+ SG_ comb_ch8 : 48|1@1+ (1,0) [0|1] ""  ECU
+ SG_ comb_ch7 : 47|1@1+ (1,0) [0|1] ""  ECU
+ SG_ comb_ch6 : 46|1@1+ (1,0) [0|1] ""  ECU
+ SG_ comb_ch5 : 45|1@1+ (1,0) [0|1] ""  ECU
+ SG_ comb_ch4 : 44|1@1+ (1,0) [0|1] ""  ECU
+ SG_ comb_ch3 : 43|1@1+ (1,0) [0|1] ""  ECU
+ SG_ comb_ch2 : 42|1@1+ (1,0) [0|1] ""  ECU
+ SG_ comb_ch1 : 41|1@1+ (1,0) [0|1] ""  ECU
+ SG_ comb_ch0 : 40|1@1+ (1,0) [0|1] ""  ECU
+ SG_ hb3_duty : 32|8@1+ (1,0) [0|255] ""  ECU
+ SG_ hb2_duty : 24|8@1+ (1,0) [0|255] ""  ECU
+ SG_ hb1_duty : 16|8@1+ (1,0) [0|255] ""  ECU
+ SG_ hb0_duty : 8|8@1+ (1,0) [0|255] ""  ECU
+ SG_ hb3_ctrl : 6|2@1+ (1,0) [0|3] ""  ECU
+ SG_ hb2_ctrl : 4|2@1+ (1,0) [0|3] ""  ECU
+ SG_ hb1_ctrl : 2|2@1+ (1,0) [0|3] ""  ECU
+ SG_ hbo_ctrl : 0|2@1+ (1,0) [0|3] ""  ECU
+
+BO_ 640 CeusAMcan_iFreq2: 8 ECU
+ SG_ ifreq2_ton_toff_6 : 40|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ ifreq2_ton_toff_5 : 32|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ ifreq2_ton_toff_4 : 24|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ ifreq2_ton_toff_3 : 16|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ ifreq2_ton_toff_2 : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ ifreq2_ton_toff_1 : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+
+BO_ 512 CeusAMcan_iFreq1: 6 ECU
+ SG_ ifreq1_ton_toff_6 : 40|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ ifreq1_ton_toff_5 : 32|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ ifreq1_ton_toff_4 : 24|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ ifreq1_ton_toff_3 : 16|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ ifreq1_ton_toff_2 : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ ifreq1_ton_toff_1 : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+
+BO_ 896 CeusAMcan_iOutI: 8 ECU
+ SG_ out_ch1_id : 0|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ out_ch3_value : 48|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ out_ch2_value : 32|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ out_ch1_value : 16|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ out_ch3_id : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ out_ch2_id : 4|4@1+ (1,0) [0|15] "" Vector__XXX
+
+BO_ 768 CeusAMcan_iLedI: 8 ECU
+ SG_ ledi_ch1_id : 12|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ ledi_ch2_voltage : 48|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ ledi_ch2_id : 44|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ ledi_ch2_current : 32|12@1+ (1,0) [0|4095] "" Vector__XXX
+ SG_ ledi_ch1_voltage : 16|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ ledi_ch1_current : 0|12@1+ (1,0) [0|4095] "" Vector__XXX
+
+BO_ 384 CeusAMcan_iAna2: 8 ECU
+ SG_ ch4_id : 60|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ ch4_value : 48|12@1+ (1,0) [0|4095] "" Vector__XXX
+ SG_ ch3_id : 44|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ ch3_value : 32|12@1+ (1,0) [0|4095] "" Vector__XXX
+ SG_ ch2_id : 28|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ ch2_value : 16|12@1+ (1,0) [0|4095] "" Vector__XXX
+ SG_ ch1_id : 12|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ ch1_value : 0|12@1+ (1,0) [0|4095] "" Vector__XXX
+
+BO_ 256 CeusAMcan_iAna1: 4 ECU
+ SG_ ana2 : 16|16@1+ (1,0) [0|65535] "0.05ohm/bit" Vector__XXX
+ SG_ ana1 : 0|16@1+ (1,0) [0|65535] "0.05ohm/bit" Vector__XXX
+
+BO_ 1024 CeusAMcan_iBool2: 1 ECU
+ SG_ v2_inf : 7|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ v1_inf : 6|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ vbat_inf : 5|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ oilavl : 4|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ wiper_fail : 2|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ sens2_inf : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ sens1_inf : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 128 CeusAMcan_iBool1: 8 ECU
+ SG_ icu1_inf : 63|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ uin7_inf : 62|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ uin6_inf : 61|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ uin5_inf : 60|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ uin4_inf : 59|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ uin3_inf : 58|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ uin2_inf : 57|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ uin1_inf : 56|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ icu1_bool : 55|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ uin7_bool : 54|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ uin6_bool : 53|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ uin5_bool : 52|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ uin4_bool : 51|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ uin3_bool : 50|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ uin2_bool : 49|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ uin1_bool : 48|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out20_inf : 47|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out19_inf : 46|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out18_inf : 45|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out17_inf : 44|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out16_inf : 43|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out15_inf : 42|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ hb4_inf : 41|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ hb3_inf : 40|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out20_bool : 39|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out19_bool : 38|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out18_bool : 37|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out17_bool : 36|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out16_bool : 35|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out15_bool : 34|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ hb4_bool : 33|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ hb3_bool : 32|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ana2_inf : 31|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ana1_inf : 30|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out14_inf : 29|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out13_inf : 28|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out12_inf : 27|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out11_inf : 26|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out10_inf : 25|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out9_inf : 24|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ana2_bool : 23|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ana1_bool : 22|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out14_bool : 21|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out13_bool : 20|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out12_bool : 19|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out11_bool : 18|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out10_bool : 17|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out9_bool : 16|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out8_inf : 15|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out7_inf : 14|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out6_inf : 13|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out5_inf : 12|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ hb2_inf : 11|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ icu2_inf : 9|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ hb1_inf : 10|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out8_bool : 7|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out7_bool : 6|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out6_bool : 5|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ out5_bool : 4|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ hb2_bool : 3|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ hb1_bool : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ icu2_bool : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ wk2_state : 8|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ wk1_state : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+
+
+CM_ BO_ 640 "频率2 获取数据时需要根据获得的数据长度重新组装数据  len=2 ton=byte[0] toff=[1],len=4 ton=byte[0:1] toff=[2:3],len=6 ton=byte[0:2] toff=[3:5]";
+CM_ BO_ 512 "频率1 获取数据时需要根据获得的数据长度重新组装数据  len=2 ton=byte[0] toff=[1],len=4 ton=byte[0:1] toff=[2:3],len=6 ton=byte[0:2] toff=[3:5]";
+CM_ BO_ 896 "OUT输出电流";
+CM_ BO_ 768 "LED输出电流";
+CM_ BO_ 384 "模拟量2";
+CM_ BO_ 256 "模拟量1";
+BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType";
+BA_DEF_ SG_  "GenSigInactiveValue" INT 0 0;
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 0;
+BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","not_used","not_used","not_used","not_used","Cyclic","not_used","IfActive","NoMsgSendType";
+BA_DEF_ BU_  "NmStationAddress" HEX 0 0;
+BA_DEF_  "DBName" STRING ;
+BA_DEF_  "BusType" STRING ;
+BA_DEF_DEF_  "GenSigSendType" "Cyclic";
+BA_DEF_DEF_  "GenSigInactiveValue" 0;
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
+BA_DEF_DEF_  "GenMsgSendType" "NoMsgSendType";
+BA_DEF_DEF_  "NmStationAddress" 0;
+BA_DEF_DEF_  "DBName" "";
+BA_DEF_DEF_  "BusType" "CAN";
+BA_ "DBName" "IM218";
+BA_ "NmStationAddress" BU_ ECU 1;
+BA_ "GenMsgCycleTime" BO_ 448 50;
+BA_ "GenMsgCycleTime" BO_ 320 50;
+BA_ "GenMsgCycleTime" BO_ 192 50;
+BA_ "GenMsgCycleTime" BO_ 640 200;
+BA_ "GenMsgCycleTime" BO_ 512 200;
+BA_ "GenMsgCycleTime" BO_ 896 200;
+BA_ "GenMsgCycleTime" BO_ 768 200;
+BA_ "GenMsgCycleTime" BO_ 384 200;
+BA_ "GenMsgCycleTime" BO_ 256 200;
+BA_ "GenMsgCycleTime" BO_ 1024 200;
+BA_ "GenMsgCycleTime" BO_ 128 200;
+BA_ "GenSigInactiveValue" SG_ 384 ch4_id 0;
+BA_ "GenSigInactiveValue" SG_ 384 ch3_id 0;
+BA_ "GenSigInactiveValue" SG_ 384 ch2_id 0;
+BA_ "GenSigInactiveValue" SG_ 384 ch1_id 0;
