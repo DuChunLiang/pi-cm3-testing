@@ -23,7 +23,6 @@ class Validate:  # 验证
         # data = b'\x55\x55\x55\x03\x00\x10\x00\x00'
 
         self.data_dict = {}
-        print("meter:", self.meter)
         if self.meter == Constant.IC_216:
             frame_id = 0xFFF0301
             if frame_id in Common.can_recv_dict:
@@ -37,9 +36,10 @@ class Validate:  # 验证
 
     # IM218测试检测
     def validate_im218(self, sign=""):
-        group_sign = sign[0:5]
-        print("im218检测")
+        group_sign = sign[0:4]
+        # print("im218检测")
 
+        print("can_val_range:", Common.can_val_range)
         # 从can接受的报文中解析数据
         if len(Common.can_recv_dict) > 0:
             al = Common.can_addr
@@ -83,11 +83,11 @@ class Validate:  # 验证
                     res = self.db.decode_message(0x80, data)
                     wk1 = int(res['wk1_state'])
                     wk2 = int(res['wk2_state'])
-
-                    wk1_min = Common.can_val_range['wk1'][0]
-                    wk1_max = Common.can_val_range['wk1'][1]
-                    wk2_min = Common.can_val_range['wk2'][0]
-                    wk2_max = Common.can_val_range['wk2'][1]
+                    print("wk1", wk1, "wk2", wk2)
+                    wk1_min = Common.can_val_range['WK1'][0]
+                    wk1_max = Common.can_val_range['WK1'][1]
+                    wk2_min = Common.can_val_range['WK2'][0]
+                    wk2_max = Common.can_val_range['WK2'][1]
 
                     if wk1 < wk1_min or wk1 > wk1_max:
                         self.error_dict["WK1"] = "%s[%s %s]" % (wk1, wk1_min, wk1_max)
@@ -114,7 +114,7 @@ class Validate:  # 验证
                 out2_ran = Common.can_val_range['OUT2']
                 out3_ran = Common.can_val_range['OUT3']
                 out4_ran = Common.can_val_range['OUT4']
-
+                print("out", out1, out2, out3, out4)
                 if out1 < out1_ran[0] or out1 > out1_ran[1]:
                     self.error_dict["OUT1"] = "%s[%s %s]" % (out1, out1_ran[0], out1_ran[1])
 
@@ -166,7 +166,7 @@ class Validate:  # 验证
 
                 out_odd_range = Common.can_val_range['OUT_ODD']
                 out_even_range = Common.can_val_range['OUT_EVEN']
-
+                print("out_dict", out_dict)
                 for out in out_dict.items():
                     key = out[0]
                     val = out[1]
@@ -197,18 +197,25 @@ class Validate:  # 验证
 
         # 从uds返回的报文中解析数据
         if len(Common.uds_recv_dict) > 0:
-            pop_dict = Common.uds_recv_dict.popitem()
-            mouth = pop_dict[0]
-            data = pop_dict[1]
-            val = struct.unpack(">I", data[3:7])[0]
+            # print("uds_recv_dict", Common.uds_recv_dict)
+            for pop_dict in Common.uds_recv_dict.items():
+                mouth = pop_dict[0]
+                data = pop_dict[1]
+                val = struct.unpack(">I", data[3:7])[0]
+                print("uds_val:", val)
+                # 8路AI测试
+                if group_sign == '0002':
+                    index = int(mouth[2:])
+                    in_odd = Common.can_val_range['IN_ODD']
+                    in_even = Common.can_val_range['IN_EVEN']
+                    if index % 2 == 0:
+                        if val < in_even[0] or val > in_even[1]:
+                            self.error_dict[mouth] = "%s[%s %s]" % (val, in_even[0], in_even[1])
+                    else:
+                        if val < in_odd[0] or val > in_odd[1]:
+                            self.error_dict[mouth] = "%s[%s %s]" % (val, in_odd[0], in_odd[1])
 
-            # 8路AI测试
-            if group_sign == '0002':
-                in_min = Common.can_val_range['in'][0]
-                in_max = Common.can_val_range['in'][1]
-                if val < in_min or in_max > max:
-                    self.error_dict[mouth] = "%s[%s %s]" % (val, min, max)
-
+        print("validate:", self.error_dict)
         # Common.error_record.update(self.error_dict)
 
     # IC218测试检测
@@ -431,6 +438,7 @@ class ValidateDataOp:
 
     # im218模块相关can信息处理
     def im218_info_handing(self, frame_id=None, data=None, len=None):
+        # print("recv can:", hex(frame_id), data)
         # 获取报文中的20路out信息
         self._get_im218_out(frame_id=frame_id, data=data)
         # 获取模块频率量
@@ -443,18 +451,18 @@ class ValidateDataOp:
             res = self.db.decode_message(frame_id, data)
             if res is not None:
                 ledi_ch1_current = int(res['ledi_ch1_current'])
-                ledi_ch1_id = "300_%s" % res['ledi_ch1_id']
+                ledi_ch1_id = int(res['ledi_ch1_id'])
                 ledi_ch2_current = int(res['ledi_ch2_current'])
-                ledi_ch2_id = "300_%s" % res['ledi_ch2_id']
+                ledi_ch2_id = int(res['ledi_ch2_id'])
                 self._im218_out_val_op(frame_id=frame_id, index=ledi_ch1_id, val=ledi_ch1_current)
                 self._im218_out_val_op(frame_id=frame_id, index=ledi_ch2_id, val=ledi_ch2_current)
 
         elif frame_id == 0x380:
             res = self.db.decode_message(frame_id, data)
             if res is not None:
-                out_ch1_id = "380_%s" % res['out_ch1_id']
-                out_ch2_id = "380_%s" % res['out_ch2_id']
-                out_ch3_id = "380_%s" % res['out_ch3_id']
+                out_ch1_id = int(res['out_ch1_id'])
+                out_ch2_id = int(res['out_ch2_id'])
+                out_ch3_id = int(res['out_ch3_id'])
                 out_ch1_value = int(res['out_ch1_value'])
                 out_ch2_value = int(res['out_ch2_value'])
                 out_ch3_value = int(res['out_ch3_value'])

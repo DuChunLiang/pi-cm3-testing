@@ -154,6 +154,7 @@ class IsoTp:
     def poll(bus, l):
         while not len(l):
             message = bus.recv()
+            # print("message", message.arbitration_id)
             for r in receivers:
                 r.receive(message)
 

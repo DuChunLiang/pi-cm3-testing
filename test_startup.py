@@ -11,6 +11,7 @@ from convert import Convert
 from config import Constant, Common, RuleConfig
 from validate import Validate, ValidateDataOp
 import RPi.GPIO as GPIO
+import threading
 
 
 GPIO.setmode(GPIO.BCM)      # 使用BCM引还脚编号，此外有 GPIO.BOARD
@@ -59,13 +60,13 @@ class PCM:
     def pin_off(self):
         if self.gpio is not None:
             GPIO.output(self.gpio, 0)
-            print(self.gpio, 0)
+            # print(self.gpio, 0)
 
     # 关闭电源
     def pin_on(self):
         if self.gpio is not None:
             GPIO.output(self.gpio, 1)
-            print(self.gpio, 1)
+            # print(self.gpio, 1)
 
     # 批量开关操作
     @staticmethod
@@ -142,44 +143,56 @@ class FQM:
     # 切换电阻
     @staticmethod
     def _rtd_switch(switch, fq_gpio):
-        name = "fq1"
-        rtd_gpio = Constant.get_val(Constant.fq1_ctrl)
+        # name = "fq1_ctrl"
+        rtd_gpio = Constant.fq1_ctrl
         if fq_gpio == Constant.get_val(Constant.fq2_ctrl_r):
-            name = "fq2"
-            rtd_gpio = Constant.get_val(Constant.fq2_ctrl)
+            # name = "fq2_ctrl"
+            rtd_gpio = Constant.fq2_ctrl
         if switch:
-            print("%s 打开" % name)
+            # print("%s 打开" % name)
             PCM(rtd_gpio).pin_on()
         else:
-            print("%s 关闭" % name)
+            # print("%s 关闭" % name)
             PCM(rtd_gpio).pin_off()
 
-    # 输出频率量
-    def send(self):
-        for fq in dict(self._fqm_rul).items():
-            fq_gpio = Constant.get_val("%s_r" % fq[0])
-            # 判断是频率还是频率的电压
-            if "fq" in fq[0]:
-                option = dict(fq[1])
-                switch = option['switch']
-                rate = int(option['rate'])
-                rtd = option['rtd']
+    # 输出fq1频率量
+    def send_fq1(self):
+        fq1_dict = dict(self._fqm_rul)["fq1"]
 
-                if switch:
-                    # 设置频率信号电阻
-                    self._rtd_switch(rtd, fq_gpio)
+        fq1_gpio = Constant.get_val(Constant.fq1_ctrl_r)
+        fq1_switch = fq1_dict['switch']
+        fq1_rate = int(fq1_dict['rate'])
+        fq1_rtd = fq1_dict['rtd']
 
-                    # 发送频率信号
-                    GPIO.setup(fq_gpio, GPIO.OUT)
-                    Common.pwm_obj = GPIO.PWM(fq_gpio, rate)
-                    Common.pwm_obj.start(50)
-                    print("%s rate=%s" % (fq[0], rate))
+        if fq1_switch:
+            # 设置频率信号电阻
+            self._rtd_switch(fq1_rtd, fq1_gpio)
+            p = GPIO.PWM(fq1_gpio, fq1_rate)
+            p.start(50)
+            print("fq1 gpio=%s rate=%s" % (fq1_gpio, fq1_rate))
 
-    # 停止频率输出
-    @staticmethod
-    def stop():
-        if Common.pwm_obj is not None:
-            Common.pwm_obj.stop()
+        while True:
+            if not Common.pwm_is_run:
+                break
+
+    # 输出fq2频率量
+    def send_fq2(self):
+        fq2_dict = dict(self._fqm_rul)["fq2"]
+        fq2_gpio = Constant.get_val(Constant.fq2_ctrl_r)
+        fq2_switch = fq2_dict['switch']
+        fq2_rate = fq2_dict['rate']
+        fq2_rtd = fq2_dict['rtd']
+
+        if fq2_switch:
+            # 设置频率信号电阻
+            self._rtd_switch(fq2_rtd, fq2_gpio)
+            p = GPIO.PWM(fq2_gpio, fq2_rate)
+            p.start(50)
+            print("fq2 gpio=%s rate=%s" % (fq2_gpio, fq2_rate))
+
+        while True:
+            if not Common.pwm_is_run:
+                break
 
 
 # SPI数据模块
@@ -196,7 +209,7 @@ class SpiM:
                 val += str(Common.relay_matrix[i][j])
 
         data = Convert().convertToHex(val)
-        print('spi write:', data)
+        # print('spi write:', data)
         self.spi.writebytes(data)
         time.sleep(0.01)
 
@@ -262,30 +275,30 @@ class CanM:
             msg = can.Message(arbitration_id=can_id, data=bytearray.fromhex(can_data), extended_id=extended_id)
             self.can_bus.send(msg)
             time.sleep(0.001)
-            print("can信息发送:", time.time(), can_id, '#', can_data)
+            # print("can信息发送:", time.time(), can_id, '#', can_data)
         except Exception as e:
             print(e)
 
     # 接收can信息
     def recv_can(self):
-        try:
-            while True:
-                bo = self.can_bus.recv(timeout=10)
-                if bo is not None:
-                    frame_id = bo.arbitration_id
-                    data = (bo.data + bytearray([0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0]))[:8]
-                    Common.can_recv_dict[frame_id] = data   # 记录收到的can信息
-                    Common.can_addr = frame_id & 0xF    # 获取报文ID中的地址值
+        # try:
+        while True:
+            bo = self.can_bus.recv(timeout=10)
+            if bo is not None:
+                frame_id = bo.arbitration_id
+                data = (bo.data + bytearray([0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0]))[:8]
+                Common.can_recv_dict[frame_id] = data   # 记录收到的can信息
+                Common.can_addr = frame_id & 0xF    # 获取报文ID中的地址值
 
-                    if Constant.check_meter == Constant.IM_218:
-                        ValidateDataOp().im218_info_handing(frame_id=frame_id, data=data, len=bo.dlc)
-                    # print("can data: ", data)
-                    time.sleep(0.01)
-        except Exception:
-            Common.error_record['Can'] = "can connect error"
-            time.sleep(5)
-            print("restart connect recv can")
-            self.recv_can()
+                if Constant.check_meter == Constant.IM_218:
+                    ValidateDataOp().im218_info_handing(frame_id=frame_id, data=data, len=bo.dlc)
+                # print("can data: ", data)
+                time.sleep(0.01)
+        # except Exception:
+        #     Common.error_record['Can'] = "can connect error"
+        #     time.sleep(5)
+        #     print("restart connect recv can")
+        #     self.recv_can()
 
 
 # 检查模块
@@ -349,6 +362,8 @@ class StartUp:
         self.rule = rule
         self.canm = canm
         self.us = us
+        Common.can_recv_dict = {}
+        Common.uds_recv_dict = {}
 
     def write(self):
         rule = self.rule
@@ -373,6 +388,9 @@ class StartUp:
                 PCM.batch_switch(pcm)
                 time.sleep(unitDelay)
 
+            if Constant.check_meter == Constant.IM_218:
+                self.start_im218()  # 启动im218模块
+
         # can
         if Constant.can in rule:
             can_dict = dict(rule[Constant.can])
@@ -382,6 +400,7 @@ class StartUp:
                 else:
                     can_id = int(c[0])
                 self.canm.send_can(can_id=can_id, can_data=c[1], extended_id=True)
+            time.sleep(unitDelay)
 
         # can接受数据规定范围
         if Constant.can_val_range in rule:
@@ -389,24 +408,29 @@ class StartUp:
 
         # uds
         if Constant.uds in rule:
-            can_dict = dict(rule[Constant.can])
-            for c in can_dict.items():
-                mouth = int(c[0])
+            uds_dict = dict(rule[Constant.uds])
+            for c in uds_dict.items():
+                mouth = c[0]
                 # uds协议获取can信息
                 res_uds_data = self.us.send(data=c[1])
                 Common.uds_recv_dict[mouth] = res_uds_data
-                # 验证报文数据
-                Validate().analysis(sign=rule['sign'])
+            time.sleep(unitDelay)
 
         # 频率信号
         if Constant.fqm in rule:
+            Common.pwm_is_run = True
             # print("频率信号:")
             # print("设置频率电压: ", rule[Constant.fqm]['vol'])
             VCM.set_rate_vol(rule[Constant.fqm]['vol'])  # 设置发送频率信号电压
             SpiM().send()  # Spi发送继电器信息
             time.sleep(unitDelay)
-            FQM(rule[Constant.fqm]).send()  # 发送频率信号
-            time.sleep(unitDelay)
+
+            t_fq1 = threading.Thread(target=FQM(rule[Constant.fqm]).send_fq1, name="threading-fq1")
+            t_fq1.setDaemon(True)
+            t_fq2 = threading.Thread(target=FQM(rule[Constant.fqm]).send_fq2, name="threading-fq2")
+            t_fq2.setDaemon(True)
+            t_fq1.start()
+            t_fq2.start()
 
         # 接口端子电阻切换
         # if Constant.i_terminal in rule:
@@ -439,10 +463,17 @@ class StartUp:
         PCM(Constant.amp_19).pin_off()
 
         if Constant.check_meter == Constant.IM_218:
-            FQM.stop()
+            Common.pwm_is_run = False
             # 关闭20路out开关
             can_id = 0xC0 + Common.can_addr
-            self.canm.send_can(can_id=can_id, can_data=b'\x00\x00\x00\x00\x00\x00\x00\x00')
+            self.canm.send_can(can_id=can_id, can_data="0000000000000000")
+
+    # 启动im218模块
+    def start_im218(self):
+        self.canm.send_can(can_id=0x040, can_data="01")
+        time.sleep(0.5)
+        self.canm.send_can(can_id=0x040, can_data="07")
+        time.sleep(0.5)
 
 
 # 获取串码
@@ -519,7 +550,6 @@ def run():
         time.sleep(0.5)
 
     canm = CanM()   # 初始化can
-    us = uds_server.UdsServer()
 
     serial_code = ""
     # serial_code = get_serial_code(meter=Constant.check_meter, canm=canm)
@@ -539,17 +569,19 @@ def run():
         for i in range(1, run_count+1):
             if len(Common.error_record) > 0:
                 break
-            print("%s 第%s次" % (describe, i))
-
-            Common.can_recv_dict = {}
+            print("\r\n%s 第%s次" % (describe, i))
 
             rule_list = root['ruleList']
             for rule in rule_list:
+                us = uds_server.UdsServer()  # 初始化uds服务
                 start_up = StartUp(rule=rule, canm=canm, us=us)
                 start_up.reset()
                 start_up.write()
-                time.sleep(2)
+                if Constant.can in rule:
+                    time.sleep(3)
                 start_up.read()
+                start_up.reset()
+                us.close()  # 关闭uds服务
                 if len(Common.error_record) > 0:
                     break
             time.sleep(delay)
@@ -582,3 +614,22 @@ def run():
     #     # pyb.LED(4).off()
     #     # pyb.LED(2).on()  # 红灯有异常
     #     print(e)
+
+
+def start_thread():
+    thread_name = "threading-canRecv"
+    t_d = threading.Thread(target=CanM().recv_can, name=thread_name)
+    t_d.setDaemon(True)
+
+    thread_name = "threading-run"
+    t_s = threading.Thread(target=run, name=thread_name)
+    t_s.setDaemon(True)
+
+    t_d.start()
+    t_s.start()
+
+    t_d.join()
+
+
+if __name__ == "__main__":
+    start_thread()

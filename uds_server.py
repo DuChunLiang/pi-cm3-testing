@@ -16,6 +16,7 @@ class UdsServer:
         can_bus = can.interface.Bus()
         id_source = int("0x0CDA%02XF1" % Common.can_addr, 16)
         id_target = int("0x0CDAF1%02X" % Common.can_addr, 16)
+        # print("id_source:", hex(id_source), "id_target:", hex(id_target), "can_addr:", Common.can_addr)
         self.tp = IsoTp(can_bus, id_source=id_source, id_target=id_target, extended_id=True)
 
     @staticmethod
@@ -23,17 +24,21 @@ class UdsServer:
         return ''.join([hex(ord(c)).replace('0x', '') for c in s]).upper()
 
     def send(self, data):
-        # print("send: ", data)
+        # print("uds_send: ", data)
         self.tp.send_pdu(bytearray.fromhex(data))
 
         res_data = self.tp.get_pdu()
-        # print("result: ", binascii.b2a_hex(res_data))
-        time.sleep(0.05)
+        # print("uds_result: ", res_data)
+        time.sleep(0.5)
         return res_data
 
+    def close(self):
+        self.tp.close()
 
-if __name__ == "__main__":
-    us = UdsServer()
-    get_res = us.send(sys.argv[1])
-    mio_val = struct.unpack(">I", get_res[3:7])[0]
-    print('---', mio_val)
+
+# if __name__ == "__main__":
+#     Common.can_addr = 5
+#     us = UdsServer()
+#     get_res = us.send(sys.argv[1])
+#     mio_val = struct.unpack(">I", get_res[3:7])[0]
+#     print('---', mio_val)

@@ -9,6 +9,8 @@ from convert import Convert
 
 GPIO.setmode(GPIO.BCM)      # 使用BCM引还脚编号，此外有 GPIO.BOARD
 GPIO.setwarnings(False)
+GPIO.setup(40, GPIO.OUT)
+GPIO.setup(41, GPIO.OUT)
 
 
 # 公共变量
@@ -113,6 +115,28 @@ class SpiM:
         print("%s spi read: %s" % (count, data))
 
 
-t = Testing()
-t.op(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
+class PWM:
+    def __init__(self):
+        pass
+
+    def start(self, fq=1, rate=0, d=50):
+        if fq == 1:
+            fq_gpio = 40
+        else:
+            fq_gpio = 41
+
+        p = GPIO.PWM(fq_gpio, rate)
+        p.start(d)
+
+        print("fq%s rate=%s" % (fq, rate))
+        count = 0
+        while True:
+            count += 1
+
+# t = Testing()
+# t.op(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
 # t.gpio_out(int(sys.argv[1]), sys.argv[2])
+
+pwm = PWM()
+pwm.start(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
+
