@@ -24,11 +24,11 @@ class UdsServer:
         return ''.join([hex(ord(c)).replace('0x', '') for c in s]).upper()
 
     def send(self, data):
-        # print("uds_send: ", data)
+        print("uds_send: ", data)
         self.tp.send_pdu(bytearray.fromhex(data))
 
         res_data = self.tp.get_pdu()
-        # print("uds_result: ", res_data)
+        print("uds_result: ", res_data)
         time.sleep(0.5)
         return res_data
 

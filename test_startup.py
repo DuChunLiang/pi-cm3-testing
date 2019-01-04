@@ -281,24 +281,24 @@ class CanM:
 
     # 接收can信息
     def recv_can(self):
-        # try:
-        while True:
-            bo = self.can_bus.recv(timeout=10)
-            if bo is not None:
-                frame_id = bo.arbitration_id
-                data = (bo.data + bytearray([0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0]))[:8]
-                Common.can_recv_dict[frame_id] = data   # 记录收到的can信息
-                Common.can_addr = frame_id & 0xF    # 获取报文ID中的地址值
+        try:
+            while True:
+                bo = self.can_bus.recv(timeout=10)
+                if bo is not None:
+                    frame_id = bo.arbitration_id
+                    data = (bo.data + bytearray([0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0]))[:8]
+                    Common.can_recv_dict[frame_id] = data   # 记录收到的can信息
+                    Common.can_addr = frame_id & 0xF    # 获取报文ID中的地址值
 
-                if Constant.check_meter == Constant.IM_218:
-                    ValidateDataOp().im218_info_handing(frame_id=frame_id, data=data, len=bo.dlc)
-                # print("can data: ", data)
-                time.sleep(0.01)
-        # except Exception:
-        #     Common.error_record['Can'] = "can connect error"
-        #     time.sleep(5)
-        #     print("restart connect recv can")
-        #     self.recv_can()
+                    if Constant.check_meter == Constant.IM_218:
+                        ValidateDataOp().im218_info_handing(frame_id=frame_id, data=data, len=bo.dlc)
+                    # print("can data: ", data)
+                    time.sleep(0.01)
+        except Exception:
+            Common.error_record['Can'] = "can connect error"
+            time.sleep(5)
+            print("restart connect recv can")
+            self.recv_can()
 
 
 # 检查模块
@@ -386,7 +386,7 @@ class StartUp:
             pcm_list = list(rule[Constant.pcm_reset])
             for pcm in pcm_list:
                 PCM.batch_switch(pcm)
-                time.sleep(unitDelay)
+                time.sleep(2)
 
             if Constant.check_meter == Constant.IM_218:
                 self.start_im218()  # 启动im218模块
@@ -482,23 +482,23 @@ def get_serial_code(meter="IC216", canm=None):
     if meter == Constant.IC_216:
         send_frame_id = 0x660
         recv_frame_id = 0x7E0
-        address_data = b'\xF6\x00\x00\x00\x00\x27\xFF\xE0'
-        length = b'\xF5\x07\x00\x00\x00\x00\x00\x00'
+        address_data = 'F60000000027FFE0'
+        length = 'F507000000000000'
 
     elif meter == Constant.IC_218:
         send_frame_id = 0x660
         recv_frame_id = 0x7E0
-        address_data = b'\xF6\x00\x00\x00\xE0\xFF\x07\x00'
-        length = b'\xF5\x07\x00\x00\x00\x00\x00\x00'
+        address_data = 'F6000000E0FF0700'
+        length = 'F507000000000000'
     else:
         send_frame_id = 0x661
         recv_frame_id = 0x7E1
-        address_data = b'\xF6\x00\x00\x00\xE0\xFF\x07\x00'
-        length = b'\xF5\x07\x00\x00\x00\x00\x00\x00'
+        address_data = 'F6000000E0FF0700'
+        length = 'F507000000000000'
 
     # 创建链接
     while True:
-        canm.send_can(can_id=send_frame_id, can_data=b'\xFF\x00\x00\x00\x00\x00\x00\x00')
+        canm.send_can(can_id=send_frame_id, can_data='FF00000000000000')
         time.sleep(0.2)
         if recv_frame_id in Common.can_recv_dict:
             if 255 == Common.can_recv_dict[recv_frame_id][0]:
@@ -516,8 +516,8 @@ def get_serial_code(meter="IC216", canm=None):
             else:
                 break
     # 退出boot
-    canm.send_can(can_id=send_frame_id, can_data=b'\xCF\x00\x00\x00\x00\x00\x00\x00')
-    canm.send_can(can_id=send_frame_id, can_data=b'\xFE\x00\x00\x00\x00\x00\x00\x00')
+    canm.send_can(can_id=send_frame_id, can_data='CF00000000000000')
+    canm.send_can(can_id=send_frame_id, can_data='FE00000000000000')
     if len(serial_code) > 0:
         serial_code = serial_code.replace(b'\xff', b'')
         serial_code = Convert.bytes_to_hexstr(serial_code)
@@ -528,6 +528,7 @@ def get_serial_code(meter="IC216", canm=None):
 
 # 运行测试程序
 def run():
+    start_time = time.time()
     # try:
     check_rule = RuleConfig.rule_ic216
     if Constant.check_meter == Constant.IC_216:
@@ -578,7 +579,7 @@ def run():
                 start_up.reset()
                 start_up.write()
                 if Constant.can in rule:
-                    time.sleep(3)
+                    time.sleep(1)
                 start_up.read()
                 start_up.reset()
                 us.close()  # 关闭uds服务
@@ -614,6 +615,7 @@ def run():
     #     # pyb.LED(4).off()
     #     # pyb.LED(2).on()  # 红灯有异常
     #     print(e)
+    print("check completed %ss" % int(time.time()-start_time))
 
 
 def start_thread():

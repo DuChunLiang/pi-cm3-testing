@@ -95,9 +95,9 @@ class SpiM:
         # self.spi.mode = 0b00
 
     def send(self):
-        # GPIO.setup(18, GPIO.OUT)
-        # GPIO.output(18, 0)
-        # time.sleep(0.1)
+        GPIO.setup(18, GPIO.OUT)
+        GPIO.output(18, 0)
+        time.sleep(0.1)
         val = ""
         for i in range(-1, (len(CPO.relay_matrix) + 1) * -1, -1):
             for j in range(-1, -9, -1):
@@ -106,9 +106,9 @@ class SpiM:
         data = Convert().convertToHex(val)
         print('spi write:', data)
         self.spi.writebytes(data)
-        # GPIO.output(18, 1)
-        # time.sleep(0.1)
-        # GPIO.cleanup()
+        GPIO.output(18, 1)
+        time.sleep(0.1)
+        GPIO.cleanup()
 
     def read(self, count):
         data = self.spi.read(11)
@@ -133,10 +133,11 @@ class PWM:
         while True:
             count += 1
 
-# t = Testing()
-# t.op(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
+
+t = Testing()
+t.op(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
 # t.gpio_out(int(sys.argv[1]), sys.argv[2])
 
-pwm = PWM()
-pwm.start(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
+# pwm = PWM()
+# pwm.start(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
 
