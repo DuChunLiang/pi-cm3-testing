@@ -135,8 +135,8 @@ class PWM:
 
 
 t = Testing()
-t.op(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
-# t.gpio_out(int(sys.argv[1]), sys.argv[2])
+# t.op(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
+t.gpio_out(int(sys.argv[1]), sys.argv[2])
 
 # pwm = PWM()
 # pwm.start(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))

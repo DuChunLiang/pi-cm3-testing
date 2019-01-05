@@ -39,7 +39,7 @@ class Validate:  # 验证
         group_sign = sign[0:4]
         # print("im218检测")
 
-        print("can_val_range:", Common.can_val_range)
+        # print("can_val_range:", Common.can_val_range)
         # 从can接受的报文中解析数据
         if len(Common.can_recv_dict) > 0:
             al = Common.can_addr
@@ -62,8 +62,11 @@ class Validate:  # 验证
                 frame_id = 0x100 + al
                 if frame_id in Common.can_recv_dict:
                     data = Common.can_recv_dict[frame_id]
-                    ain1 = struct.unpack("<H", data[0:2])[0]
-                    ain2 = struct.unpack("<H", data[2:4])[0]
+                    ain1 = struct.unpack("<H", data[0:2])[0] * 0.05
+                    ain2 = struct.unpack("<H", data[2:4])[0] * 0.05
+
+                    print("ain1:", ain1, "ain2:", ain2)
+
                     ain1_min = Common.can_val_range['ain1'][0]
                     ain1_max = Common.can_val_range['ain1'][1]
                     ain2_min = Common.can_val_range['ain2'][0]
@@ -188,7 +191,7 @@ class Validate:  # 验证
 
                 fq1_range = Common.can_val_range['FQ1']
                 fq2_range = Common.can_val_range['FQ2']
-
+                print("fq1", fq1, "fq2", fq2)
                 if fq1 < fq1_range[0] or fq1 > fq1_range[1]:
                     self.error_dict["FQ1"] = "%s[%s %s]" % (fq1, fq1_range[0], fq1_range[1])
 
@@ -198,11 +201,11 @@ class Validate:  # 验证
         # 从uds返回的报文中解析数据
         if len(Common.uds_recv_dict) > 0:
             # print("uds_recv_dict", Common.uds_recv_dict)
-            for pop_dict in Common.uds_recv_dict.items():
-                mouth = pop_dict[0]
-                data = pop_dict[1]
+            for key in sorted(Common.uds_recv_dict):
+                mouth = key
+                data = Common.uds_recv_dict[key]
                 val = struct.unpack(">I", data[3:7])[0]
-                print("uds_val:", val)
+                print(mouth, "uds_val:", val)
                 # 8路AI测试
                 if group_sign == '0002':
                     index = int(mouth[2:])
@@ -215,7 +218,7 @@ class Validate:  # 验证
                         if val < in_odd[0] or val > in_odd[1]:
                             self.error_dict[mouth] = "%s[%s %s]" % (val, in_odd[0], in_odd[1])
 
-        print("validate:", self.error_dict)
+        # print("validate:", self.error_dict, "\r\n")
         # Common.error_record.update(self.error_dict)
 
     # IC218测试检测
@@ -433,8 +436,8 @@ class Validate:  # 验证
 # 验证相关消息处理
 class ValidateDataOp:
 
-    def __init__(self):
-        self.db = cantools.database.load_file('dbc/IM218.dbc')
+    def __init__(self, db=None):
+        self.db = db
 
     # im218模块相关can信息处理
     def im218_info_handing(self, frame_id=None, data=None, len=None):
@@ -474,6 +477,7 @@ class ValidateDataOp:
     # 根据报文的索引值获取输出值
     @staticmethod
     def _im218_out_val_op(frame_id, index, val):
+        # print(hex(frame_id), index, val)
         if frame_id == 0x300:
             if index == 1:
                 Common.im218_out_dict['OUT9'] = val
@@ -525,20 +529,20 @@ class ValidateDataOp:
             ton_toff_1 = int(res['ifreq1_ton_toff_2'])
             ton_toff_2 = int(res['ifreq1_ton_toff_3'])
             ton_toff_3 = int(res['ifreq1_ton_toff_4'])
-            ton_toff_4 = int(res['ifreq1_ton_toff_5'])
-            ton_toff_5 = int(res['ifreq1_ton_toff_6'])
+            # ton_toff_4 = int(res['ifreq1_ton_toff_5'])
+            # ton_toff_5 = int(res['ifreq1_ton_toff_6'])
 
             if len == 2:
                 ton = ton_toff_0
                 toff = ton_toff_1
-            elif len == 4:
+            else:
                 ton = int("%02X%02X" % (ton_toff_1, ton_toff_0), 16)
                 toff = int("%02X%02X" % (ton_toff_3, ton_toff_2), 16)
-            else:
-                ton = int("%02X%02X%02X" % (ton_toff_2, ton_toff_1, ton_toff_0), 16)
-                toff = int("%02X%02X%02X" % (ton_toff_5, ton_toff_4, ton_toff_3), 16)
+            # else:
+            #     ton = int("%02X%02X%02X" % (ton_toff_2, ton_toff_1, ton_toff_0), 16)
+            #     toff = int("%02X%02X%02X" % (ton_toff_5, ton_toff_4, ton_toff_3), 16)
 
-            Common.im218_fq_dict["FQ1"] = 1/(ton+toff)
+            Common.im218_fq_dict["FQ1"] = 1000000/(ton+toff)
 
         elif frame_id == 0x280:
             res = self.db.decode_message(frame_id, data)
@@ -546,40 +550,17 @@ class ValidateDataOp:
             ton_toff_1 = int(res['ifreq2_ton_toff_2'])
             ton_toff_2 = int(res['ifreq2_ton_toff_3'])
             ton_toff_3 = int(res['ifreq2_ton_toff_4'])
-            ton_toff_4 = int(res['ifreq2_ton_toff_5'])
-            ton_toff_5 = int(res['ifreq2_ton_toff_6'])
+            # ton_toff_4 = int(res['ifreq2_ton_toff_5'])
+            # ton_toff_5 = int(res['ifreq2_ton_toff_6'])
 
             if len == 2:
                 ton = ton_toff_0
                 toff = ton_toff_1
-            elif len == 4:
+            else:
                 ton = int("%02X%02X" % (ton_toff_1, ton_toff_0), 16)
                 toff = int("%02X%02X" % (ton_toff_3, ton_toff_2), 16)
-            else:
-                ton = int("%02X%02X%02X" % (ton_toff_2, ton_toff_1, ton_toff_0), 16)
-                toff = int("%02X%02X%02X" % (ton_toff_5, ton_toff_4, ton_toff_3), 16)
+            # else:
+            #     ton = int("%02X%02X%02X" % (ton_toff_2, ton_toff_1, ton_toff_0), 16)
+            #     toff = int("%02X%02X%02X" % (ton_toff_5, ton_toff_4, ton_toff_3), 16)
 
-            Common.im218_fq_dict["FQ2"] = 1/(ton+toff)
-
-# v.analysis(frame_id=0X0FFF0301)
-# print_dict = {}
-# for d in v.data_dict.items():
-#     key = d[0]
-#
-#     if "IN" in key:
-#         index = int(key.split("_")[1])
-#         if index <= 16:
-#             print_dict[key] = "X1_A1"
-#         elif index <= 32:
-#             print_dict[key] = "X1_B1"
-#         else:
-#             print_dict[key] = "X3_1"
-#
-#     if "OUT" in key:
-#         index = int(key.split("_")[1])
-#         if index <= 4:
-#             print_dict[key] = "X2B_1"
-#         else:
-#             print_dict[key] = "X3_1"
-#
-# print(print_dict)
+            Common.im218_fq_dict["FQ2"] = 1000000/(ton+toff)

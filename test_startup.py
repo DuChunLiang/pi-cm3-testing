@@ -203,15 +203,19 @@ class SpiM:
         self.spi.max_speed_hz = baudrate
 
     def send(self):
+        GPIO.setup(18, GPIO.OUT)
+        GPIO.output(18, 0)
+        time.sleep(0.1)
         val = ""
         for i in range(-1, (len(Common.relay_matrix) + 1) * -1, -1):
             for j in range(-1, -9, -1):
                 val += str(Common.relay_matrix[i][j])
 
         data = Convert().convertToHex(val)
-        # print('spi write:', data)
+        print('spi write:', data)
         self.spi.writebytes(data)
-        time.sleep(0.01)
+        GPIO.output(18, 1)
+        time.sleep(0.1)
 
     def send_data(self, data):
         # print('spi write:', data)
@@ -275,7 +279,7 @@ class CanM:
             msg = can.Message(arbitration_id=can_id, data=bytearray.fromhex(can_data), extended_id=extended_id)
             self.can_bus.send(msg)
             time.sleep(0.001)
-            # print("can信息发送:", time.time(), can_id, '#', can_data)
+            print("can信息发送:", time.time(), hex(can_id), '#', can_data, extended_id)
         except Exception as e:
             print(e)
 
@@ -289,11 +293,8 @@ class CanM:
                     data = (bo.data + bytearray([0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0]))[:8]
                     Common.can_recv_dict[frame_id] = data   # 记录收到的can信息
                     Common.can_addr = frame_id & 0xF    # 获取报文ID中的地址值
-
                     if Constant.check_meter == Constant.IM_218:
-                        ValidateDataOp().im218_info_handing(frame_id=frame_id, data=data, len=bo.dlc)
-                    # print("can data: ", data)
-                    time.sleep(0.01)
+                        ValidateDataOp(db=self.db).im218_info_handing(frame_id=frame_id, data=data, len=bo.dlc)
         except Exception:
             Common.error_record['Can'] = "can connect error"
             time.sleep(5)
@@ -399,7 +400,11 @@ class StartUp:
                     can_id = int(str(c[0]).split("|")[0])
                 else:
                     can_id = int(c[0])
-                self.canm.send_can(can_id=can_id, can_data=c[1], extended_id=True)
+                can_id += Common.can_addr
+                extended_id = False
+                if "IC" in Constant.check_meter:
+                    extended_id = True
+                self.canm.send_can(can_id=can_id, can_data=c[1], extended_id=extended_id)
             time.sleep(unitDelay)
 
         # can接受数据规定范围
@@ -408,6 +413,7 @@ class StartUp:
 
         # uds
         if Constant.uds in rule:
+            time.sleep(5)
             uds_dict = dict(rule[Constant.uds])
             for c in uds_dict.items():
                 mouth = c[0]
@@ -422,7 +428,7 @@ class StartUp:
             # print("频率信号:")
             # print("设置频率电压: ", rule[Constant.fqm]['vol'])
             VCM.set_rate_vol(rule[Constant.fqm]['vol'])  # 设置发送频率信号电压
-            SpiM().send()  # Spi发送继电器信息
+            # SpiM().send()  # Spi发送继电器信息
             time.sleep(unitDelay)
 
             t_fq1 = threading.Thread(target=FQM(rule[Constant.fqm]).send_fq1, name="threading-fq1")
@@ -466,7 +472,9 @@ class StartUp:
             Common.pwm_is_run = False
             # 关闭20路out开关
             can_id = 0xC0 + Common.can_addr
-            self.canm.send_can(can_id=can_id, can_data="0000000000000000")
+            for i in range(2):
+                self.canm.send_can(can_id=can_id, can_data="0000000000000000")
+                time.sleep(0.1)
 
     # 启动im218模块
     def start_im218(self):
@@ -579,7 +587,7 @@ def run():
                 start_up.reset()
                 start_up.write()
                 if Constant.can in rule:
-                    time.sleep(1)
+                    time.sleep(3)
                 start_up.read()
                 start_up.reset()
                 us.close()  # 关闭uds服务

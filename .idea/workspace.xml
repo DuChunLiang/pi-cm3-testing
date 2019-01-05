@@ -7,6 +7,7 @@
       <change beforePath="$PROJECT_DIR$/test_startup.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_startup.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/testing.py" beforeDir="false" afterPath="$PROJECT_DIR$/testing.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/uds_server.py" beforeDir="false" afterPath="$PROJECT_DIR$/uds_server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/validate.py" beforeDir="false" afterPath="$PROJECT_DIR$/validate.py" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -19,48 +20,49 @@
     <session id="-1796922134">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="1" />
+          <entry key="project.closed" value="2" />
           <entry key="project.open.time.10" value="1" />
           <entry key="project.open.time.3" value="1" />
-          <entry key="project.opened" value="2" />
+          <entry key="project.open.time.9" value="1" />
+          <entry key="project.opened" value="3" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="123" value="1" />
-          <entry key="py" value="14" />
+          <entry key="py" value="17" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="PLAIN_TEXT" value="1" />
-          <entry key="Python" value="14" />
+          <entry key="Python" value="17" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="1531" />
+          <entry key="py" value="2156" />
           <entry key="txt" value="10" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="10" />
-          <entry key="Python" value="1531" />
+          <entry key="Python" value="2156" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/test_startup.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="480">
-              <caret line="611" column="43" lean-forward="true" selection-start-line="611" selection-start-column="43" selection-end-line="611" selection-end-column="43" />
+            <state relative-caret-position="226">
+              <caret line="518" column="17" lean-forward="true" selection-start-line="518" selection-start-column="17" selection-end-line="518" selection-end-column="17" />
               <folding>
                 <element signature="e#46#61#0" expanded="true" />
-                <marker date="1546594272358" expanded="true" signature="18639:18644" ph="..." />
+                <marker date="1546685152122" expanded="true" signature="18955:18960" ph="..." />
               </folding>
             </state>
           </provider>
@@ -69,8 +71,20 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/validate.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="346">
-              <caret line="522" column="56" lean-forward="true" selection-start-line="522" selection-start-column="56" selection-end-line="522" selection-end-column="56" />
+            <state relative-caret-position="493">
+              <caret line="550" column="54" lean-forward="true" selection-start-line="550" selection-start-column="54" selection-end-line="550" selection-end-column="54" />
+              <folding>
+                <element signature="e#46#61#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/config.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="233">
+              <caret line="100" column="21" selection-start-line="100" selection-start-column="21" selection-end-line="100" selection-end-column="21" />
             </state>
           </provider>
         </entry>
@@ -78,8 +92,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/uds_server.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="309">
-              <caret line="29" column="32" selection-start-line="29" selection-start-column="32" selection-end-line="29" selection-end-column="32" />
+            <state relative-caret-position="233">
+              <caret line="16" column="61" lean-forward="true" selection-start-line="16" selection-start-column="61" selection-end-line="16" selection-end-column="61" />
               <folding>
                 <element signature="e#23#33#0" expanded="true" />
               </folding>
@@ -91,28 +105,19 @@
         <entry file="file://$PROJECT_DIR$/udstools.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="302">
-              <caret line="127" column="34" lean-forward="true" selection-start-line="127" selection-start-column="34" selection-end-line="127" selection-end-column="34" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/testing.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="461">
-              <caret line="108" column="26" lean-forward="true" selection-start-line="108" selection-start-column="26" selection-end-line="108" selection-end-column="26" />
-              <folding>
-                <marker date="1546594559973" expanded="true" signature="3077:3404" ph="..." />
-              </folding>
+              <caret line="127" column="34" selection-start-line="127" selection-start-column="34" selection-end-line="127" selection-end-column="34" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/config.py">
+        <entry file="file://$PROJECT_DIR$/testing.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="135" column="58" lean-forward="true" selection-start-line="135" selection-start-column="58" selection-end-line="135" selection-end-column="58" />
+            <state relative-caret-position="150">
+              <caret line="27" column="57" lean-forward="true" selection-start-line="27" selection-start-column="57" selection-end-line="27" selection-end-column="57" />
+              <folding>
+                <marker date="1546675371339" expanded="true" signature="3077:3404" ph="..." />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -130,6 +135,8 @@
       <find>007_</find>
       <find>0007_</find>
       <find>\x</find>
+      <find>uds_recv_dict</find>
+      <find>Validate</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -140,12 +147,12 @@
       <list>
         <option value="$PROJECT_DIR$/vcp_start.py" />
         <option value="$PROJECT_DIR$/udstools.py" />
-        <option value="$PROJECT_DIR$/validate.py" />
         <option value="$PROJECT_DIR$/buzzer.py" />
         <option value="$PROJECT_DIR$/uds_server.py" />
-        <option value="$PROJECT_DIR$/config.py" />
-        <option value="$PROJECT_DIR$/test_startup.py" />
         <option value="$PROJECT_DIR$/testing.py" />
+        <option value="$PROJECT_DIR$/config.py" />
+        <option value="$PROJECT_DIR$/validate.py" />
+        <option value="$PROJECT_DIR$/test_startup.py" />
       </list>
     </option>
   </component>
@@ -156,7 +163,7 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="262" />
+    <option name="x" value="125" />
     <option name="y" value="105" />
     <option name="width" value="1552" />
     <option name="height" value="904" />
@@ -184,7 +191,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1546595189696" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1546595643303" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../../java" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
@@ -217,7 +224,8 @@
       <option name="presentableId" value="Default" />
       <updated>1546507345710</updated>
       <workItem from="1546507348391" duration="2896000" />
-      <workItem from="1546562105548" duration="23358000" />
+      <workItem from="1546562105548" duration="23973000" />
+      <workItem from="1546656859751" duration="20472000" />
     </task>
     <task id="LOCAL-00001" summary="测试文件">
       <created>1546507415248</created>
@@ -247,16 +255,24 @@
       <option name="project" value="LOCAL" />
       <updated>1546590885924</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="提交代码">
+      <created>1546595633332</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1546595633332</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="26254000" />
+    <option name="totallyTimeSpent" value="47341000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="262" y="105" width="1552" height="904" extended-state="0" />
+    <frame x="125" y="105" width="1552" height="904" extended-state="0" />
+    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25404313" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25808626" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -302,27 +318,11 @@
     <entry file="file://$PROJECT_DIR$/123" />
     <entry file="file://$PROJECT_DIR$/canlog.py" />
     <entry file="file://$PROJECT_DIR$/vcp_start.py" />
-    <entry file="file://$PROJECT_DIR$/buzzer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
-          <caret line="8" column="25" lean-forward="true" selection-start-line="8" selection-start-column="25" selection-end-line="8" selection-end-column="25" />
-          <folding>
-            <element signature="e#44#67#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/validate.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="346">
-          <caret line="522" column="56" lean-forward="true" selection-start-line="522" selection-start-column="56" selection-end-line="522" selection-end-column="56" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/buzzer.py" />
     <entry file="file://$PROJECT_DIR$/uds_server.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="309">
-          <caret line="29" column="32" selection-start-line="29" selection-start-column="32" selection-end-line="29" selection-end-column="32" />
+        <state relative-caret-position="233">
+          <caret line="16" column="61" lean-forward="true" selection-start-line="16" selection-start-column="61" selection-end-line="16" selection-end-column="61" />
           <folding>
             <element signature="e#23#33#0" expanded="true" />
           </folding>
@@ -332,34 +332,44 @@
     <entry file="file://$PROJECT_DIR$/udstools.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="302">
-          <caret line="127" column="34" lean-forward="true" selection-start-line="127" selection-start-column="34" selection-end-line="127" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="135" column="58" lean-forward="true" selection-start-line="135" selection-start-column="58" selection-end-line="135" selection-end-column="58" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test_startup.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="480">
-          <caret line="611" column="43" lean-forward="true" selection-start-line="611" selection-start-column="43" selection-end-line="611" selection-end-column="43" />
-          <folding>
-            <element signature="e#46#61#0" expanded="true" />
-            <marker date="1546594272358" expanded="true" signature="18639:18644" ph="..." />
-          </folding>
+          <caret line="127" column="34" selection-start-line="127" selection-start-column="34" selection-end-line="127" selection-end-column="34" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/testing.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="461">
-          <caret line="108" column="26" lean-forward="true" selection-start-line="108" selection-start-column="26" selection-end-line="108" selection-end-column="26" />
+        <state relative-caret-position="150">
+          <caret line="27" column="57" lean-forward="true" selection-start-line="27" selection-start-column="57" selection-end-line="27" selection-end-column="57" />
           <folding>
-            <marker date="1546594559973" expanded="true" signature="3077:3404" ph="..." />
+            <marker date="1546675371339" expanded="true" signature="3077:3404" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="233">
+          <caret line="100" column="21" selection-start-line="100" selection-start-column="21" selection-end-line="100" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/validate.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="493">
+          <caret line="550" column="54" lean-forward="true" selection-start-line="550" selection-start-column="54" selection-end-line="550" selection-end-column="54" />
+          <folding>
+            <element signature="e#46#61#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test_startup.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="226">
+          <caret line="518" column="17" lean-forward="true" selection-start-line="518" selection-start-column="17" selection-end-line="518" selection-end-column="17" />
+          <folding>
+            <element signature="e#46#61#0" expanded="true" />
+            <marker date="1546685152122" expanded="true" signature="18955:18960" ph="..." />
           </folding>
         </state>
       </provider>
