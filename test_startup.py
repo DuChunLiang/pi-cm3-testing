@@ -469,7 +469,6 @@ class StartUp:
         PCM(Constant.amp_19).pin_off()
 
         if Constant.check_meter == Constant.IM_218:
-            Common.pwm_is_run = False
             # 关闭20路out开关
             can_id = 0xC0 + Common.can_addr
             for i in range(2):
@@ -588,6 +587,7 @@ def run():
                 start_up.write()
                 if Constant.can in rule:
                     time.sleep(3)
+                Common.pwm_is_run = False
                 start_up.read()
                 start_up.reset()
                 us.close()  # 关闭uds服务
