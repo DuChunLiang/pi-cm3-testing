@@ -212,7 +212,7 @@ class SpiM:
                 val += str(Common.relay_matrix[i][j])
 
         data = Convert().convertToHex(val)
-        print('spi write:', data)
+        # print('spi write:', data)
         self.spi.writebytes(data)
         GPIO.output(18, 1)
         time.sleep(0.1)
@@ -279,7 +279,7 @@ class CanM:
             msg = can.Message(arbitration_id=can_id, data=bytearray.fromhex(can_data), extended_id=extended_id)
             self.can_bus.send(msg)
             time.sleep(0.001)
-            print("can信息发送:", time.time(), hex(can_id), '#', can_data, extended_id)
+            # print("can信息发送:", time.time(), hex(can_id), '#', can_data, extended_id)
         except Exception as e:
             print(e)
 
@@ -300,6 +300,16 @@ class CanM:
             time.sleep(5)
             print("restart connect recv can")
             self.recv_can()
+
+    # im218循环发送占空比
+    def send_out_duty(self):
+        while True:
+            for duty in Constant.im218_out_duty_dict.items():
+                can_id = 0x140 + Common.can_addr
+                self.send_can(can_id=can_id, can_data=duty[1])
+                time.sleep(0.01)
+            if not Common.im218_is_out_duty:
+                break
 
 
 # 检查模块
@@ -375,6 +385,12 @@ class StartUp:
             AdcM.switch_circuit(rule[Constant.adc]['amp'])
             time.sleep(unitDelay)
 
+        # 接口端子电阻切换
+        if Constant.i_terminal in rule:
+            # print("接口端子电阻切换:")
+            RCM.set_i_terminal(rule[Constant.i_terminal]['data'])
+            time.sleep(unitDelay)
+
         # 继电器矩阵
         if Constant.relay_m in rule:
             # print("继电器矩阵:")
@@ -394,6 +410,13 @@ class StartUp:
 
         # can
         if Constant.can in rule:
+            if Constant.check_meter == Constant.IM_218:
+                if "0006" in rule['sign']:
+                    Common.im218_is_out_duty = True
+                    t_out = threading.Thread(target=self.canm.send_out_duty, name="threading-out")
+                    t_out.setDaemon(True)
+                    t_out.start()
+
             can_dict = dict(rule[Constant.can])
             for c in can_dict.items():
                 if "|" in c[0]:
@@ -413,13 +436,16 @@ class StartUp:
 
         # uds
         if Constant.uds in rule:
-            time.sleep(5)
             uds_dict = dict(rule[Constant.uds])
-            for c in uds_dict.items():
-                mouth = c[0]
+            for key in sorted(uds_dict):
                 # uds协议获取can信息
-                res_uds_data = self.us.send(data=c[1])
-                Common.uds_recv_dict[mouth] = res_uds_data
+                res_uds_data = self.us.send(data=uds_dict[key])
+
+                keys = str(key).split("|")
+                mouth = keys[0]
+                mark = keys[1]
+                if "val" in mark:
+                    Common.uds_recv_dict[mouth] = res_uds_data
             time.sleep(unitDelay)
 
         # 频率信号
@@ -438,13 +464,6 @@ class StartUp:
             t_fq1.start()
             t_fq2.start()
 
-        # 接口端子电阻切换
-        # if Constant.i_terminal in rule:
-        #     # print("接口端子电阻切换:")
-        #     RCM.set_i_terminal(rule[Constant.i_terminal]['data'])
-        #     SpiM().send()  # Spi发送继电器信息
-        #     time.sleep(unitDelay)
-
         # print("write success")
 
     def read(self):
@@ -452,6 +471,9 @@ class StartUp:
 
         # 验证报文数据
         Validate().analysis(sign=rule['sign'])
+
+        Common.im218_is_out_duty = False
+        Common.pwm_is_run = False
 
         # # 检查电压
         # CheckM(rule).check_vol(Constant.vol1_adc)
@@ -585,10 +607,10 @@ def run():
                 start_up = StartUp(rule=rule, canm=canm, us=us)
                 start_up.reset()
                 start_up.write()
-                if Constant.can in rule:
-                    time.sleep(3)
-                Common.pwm_is_run = False
+                # if Constant.can in rule:
+                #     time.sleep(3)
                 start_up.read()
+                # time.sleep(30*60)
                 start_up.reset()
                 us.close()  # 关闭uds服务
                 if len(Common.error_record) > 0:
