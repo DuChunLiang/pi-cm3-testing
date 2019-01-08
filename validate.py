@@ -43,27 +43,14 @@ class Validate:  # 验证
         # 从can接受的报文中解析数据
         if len(Common.can_recv_dict) > 0:
             al = Common.can_addr
-            # AL1和AL2测试
-            if group_sign == '0001':
-                if sign == "0001_0":
-                    if al != 5:
-                        self.error_dict["AL"] = "%s[5]" % al
-
-                if sign == "0001_1":
-                    if al != 7:
-                        self.error_dict["AL"] = "%s[7]" % al
-
-                if sign == "0001_2":
-                    if al != 3:
-                        self.error_dict["AL"] = "%s[3]" % al
 
             # AIN1和AIN2测试
             if group_sign == '0003':
                 frame_id = 0x100 + al
                 if frame_id in Common.can_recv_dict:
                     data = Common.can_recv_dict[frame_id]
-                    ain1 = struct.unpack("<H", data[0:2])[0] * 0.05
-                    ain2 = struct.unpack("<H", data[2:4])[0] * 0.05
+                    ain1 = struct.unpack("<H", data[0:2])[0]
+                    ain2 = struct.unpack("<H", data[2:4])[0]
 
                     print("ain1:", ain1, "ain2:", ain2)
 
@@ -125,6 +112,25 @@ class Validate:  # 验证
                 # print("uds_data:", data)
                 val = struct.unpack(">I", data[3:7])[0]
                 print(mouth, "uds_val:", val)
+
+                # AL1和AL2测试
+                if group_sign == '0001':
+                    # if sign == "0001_0":
+                    #     if Common.can_addr != 5:
+                    #         self.error_dict["AL"] = "%s[5]" % Common.can_addr
+                    #
+                    # if sign == "0001_1":
+                    #     if Common.can_addr != 7:
+                    #         self.error_dict["AL"] = "%s[7]" % Common.can_addr
+                    #
+                    # if sign == "0001_2":
+                    #     if Common.can_addr != 3:
+                    #         self.error_dict["AL"] = "%s[3]" % Common.can_addr
+
+                    ran = Common.can_val_range[mouth]
+                    if val < ran[0] or val > ran[1]:
+                        self.error_dict[mouth] = "%s[%s %s]" % (val, ran[0], ran[1])
+
                 # 8路AI测试
                 if group_sign == '0002':
                     index = int(mouth[2:])
@@ -155,7 +161,8 @@ class Validate:  # 验证
                         if val < out_odd[0] or val > out_odd[1]:
                             self.error_dict[mouth] = "%s[%s %s]" % (val, out_odd[0], out_odd[1])
 
-        print("validate:", self.error_dict.__str__(), "\r\n")
+        if len(self.error_dict) > 0:
+            print("validate:", self.error_dict.__str__())
         # Common.error_record.update(self.error_dict)
 
     # IC218测试检测
@@ -378,7 +385,6 @@ class ValidateDataOp:
 
     # im218模块相关can信息处理
     def im218_info_handing(self, frame_id=None, data=None, len=None):
-        # print("recv can:", hex(frame_id), data)
         # 获取模块频率量
         self._get_im218_fq(frame_id=frame_id, data=data, len=len)
 

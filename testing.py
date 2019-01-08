@@ -11,7 +11,7 @@ GPIO.setmode(GPIO.BCM)      # 使用BCM引还脚编号，此外有 GPIO.BOARD
 GPIO.setwarnings(False)
 GPIO.setup(40, GPIO.OUT)
 GPIO.setup(41, GPIO.OUT)
-
+GPIO.setup(19, GPIO.OUT)
 
 # 公共变量
 class CPO:
@@ -95,9 +95,8 @@ class SpiM:
         # self.spi.mode = 0b00
 
     def send(self):
-        GPIO.setup(18, GPIO.OUT)
-        GPIO.output(18, 0)
-        time.sleep(0.1)
+        GPIO.output(19, 0)
+        time.sleep(1)
         val = ""
         for i in range(-1, (len(CPO.relay_matrix) + 1) * -1, -1):
             for j in range(-1, -9, -1):
@@ -106,9 +105,9 @@ class SpiM:
         data = Convert().convertToHex(val)
         print('spi write:', data)
         self.spi.writebytes(data)
-        GPIO.output(18, 1)
+        GPIO.output(19, 1)
         time.sleep(0.1)
-        GPIO.cleanup()
+        # GPIO.cleanup()
 
     def read(self, count):
         data = self.spi.read(11)

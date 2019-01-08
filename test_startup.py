@@ -12,6 +12,7 @@ from config import Constant, Common, RuleConfig
 from validate import Validate, ValidateDataOp
 import RPi.GPIO as GPIO
 import threading
+import struct
 
 
 GPIO.setmode(GPIO.BCM)      # 使用BCM引还脚编号，此外有 GPIO.BOARD
@@ -26,6 +27,7 @@ GPIO.setup(Constant.get_val(Constant.fq1_ctrl), GPIO.OUT)
 GPIO.setup(Constant.get_val(Constant.fq1_ctrl_r), GPIO.OUT)
 GPIO.setup(Constant.get_val(Constant.fq2_ctrl), GPIO.OUT)
 GPIO.setup(Constant.get_val(Constant.fq2_ctrl_r), GPIO.OUT)
+GPIO.setup(19, GPIO.OUT)
 
 
 # 日志
@@ -203,8 +205,8 @@ class SpiM:
         self.spi.max_speed_hz = baudrate
 
     def send(self):
-        GPIO.setup(18, GPIO.OUT)
-        GPIO.output(18, 0)
+
+        GPIO.output(19, 0)
         time.sleep(0.1)
         val = ""
         for i in range(-1, (len(Common.relay_matrix) + 1) * -1, -1):
@@ -214,13 +216,16 @@ class SpiM:
         data = Convert().convertToHex(val)
         # print('spi write:', data)
         self.spi.writebytes(data)
-        GPIO.output(18, 1)
+        GPIO.output(19, 1)
         time.sleep(0.1)
 
     def send_data(self, data):
         # print('spi write:', data)
+        GPIO.output(19, 0)
+        time.sleep(0.1)
         self.spi.writebytes(data)
-        time.sleep(0.01)
+        GPIO.output(19, 1)
+        time.sleep(0.1)
 
 
 # ADC采集电压模块
@@ -295,21 +300,24 @@ class CanM:
                     Common.can_addr = frame_id & 0xF    # 获取报文ID中的地址值
                     if Constant.check_meter == Constant.IM_218:
                         ValidateDataOp(db=self.db).im218_info_handing(frame_id=frame_id, data=data, len=bo.dlc)
+                        self.check_start_up(frame_id=frame_id)  # 检查模块启动
+                        # print("can recv: %03X#%s" % (frame_id, data))
         except Exception:
             Common.error_record['Can'] = "can connect error"
             time.sleep(5)
             print("restart connect recv can")
             self.recv_can()
 
-    # im218循环发送占空比
-    def send_out_duty(self):
-        while True:
-            for duty in Constant.im218_out_duty_dict.items():
-                can_id = 0x140 + Common.can_addr
-                self.send_can(can_id=can_id, can_data=duty[1])
-                time.sleep(0.01)
-            if not Common.im218_is_out_duty:
-                break
+    # 检查模块启动
+    def check_start_up(self, frame_id=None):
+        frame_id = frame_id - Common.can_addr
+        # 判断是否有重启或复位
+        if frame_id == 0x0:
+            # 启动模块
+            self.send_can(can_id=0x040, can_data="01")
+            time.sleep(0.5)
+            self.send_can(can_id=0x040, can_data="07")
+            time.sleep(0.5)
 
 
 # 检查模块
@@ -367,12 +375,24 @@ class CheckM:
                 Log().write_log(content=content)
 
 
+# 温度
+class Tem:
+    def __init__(self, us):
+        self.us = us
+
+    # 获取温度
+    def get_tem(self):
+        # uds协议获取can信息
+        res_uds_data = self.us.send(data="22040408")
+        val = round(struct.unpack(">I", res_uds_data[3:7])[0] * 0.1)
+        return val
+
+
 # 启动测试
 class StartUp:
-    def __init__(self, rule, canm, us):
+    def __init__(self, rule, canm):
         self.rule = rule
         self.canm = canm
-        self.us = us
         Common.can_recv_dict = {}
         Common.uds_recv_dict = {}
 
@@ -397,26 +417,18 @@ class StartUp:
             RelayM(rule[Constant.relay_m]).set()
             SpiM().send()  # Spi发送继电器信息
             time.sleep(unitDelay)
+            SpiM().send()  # Spi发送继电器信息
+            time.sleep(unitDelay)
 
         # 重置电源
         if Constant.pcm_reset in rule:
-            pcm_list = list(rule[Constant.pcm_reset])
-            for pcm in pcm_list:
-                PCM.batch_switch(pcm)
-                time.sleep(2)
-
-            if Constant.check_meter == Constant.IM_218:
-                self.start_im218()  # 启动im218模块
-
+            time.sleep(5)
+        #     pcm_list = list(rule[Constant.pcm_reset])
+        #     for pcm in pcm_list:
+        #         PCM.batch_switch(pcm)
+        #         time.sleep(5)
         # can
         if Constant.can in rule:
-            if Constant.check_meter == Constant.IM_218:
-                if "0006" in rule['sign']:
-                    Common.im218_is_out_duty = True
-                    t_out = threading.Thread(target=self.canm.send_out_duty, name="threading-out")
-                    t_out.setDaemon(True)
-                    t_out.start()
-
             can_dict = dict(rule[Constant.can])
             for c in can_dict.items():
                 if "|" in c[0]:
@@ -437,15 +449,16 @@ class StartUp:
         # uds
         if Constant.uds in rule:
             uds_dict = dict(rule[Constant.uds])
+            us = uds_server.UdsServer(can_bus=self.canm.can_bus)  # 初始化uds服务
             for key in sorted(uds_dict):
                 # uds协议获取can信息
-                res_uds_data = self.us.send(data=uds_dict[key])
-
+                res_uds_data = us.send(data=uds_dict[key])
                 keys = str(key).split("|")
                 mouth = keys[0]
                 mark = keys[1]
                 if "val" in mark:
                     Common.uds_recv_dict[mouth] = res_uds_data
+            us.close()
             time.sleep(unitDelay)
 
         # 频率信号
@@ -457,14 +470,12 @@ class StartUp:
             # SpiM().send()  # Spi发送继电器信息
             time.sleep(unitDelay)
 
-            t_fq1 = threading.Thread(target=FQM(rule[Constant.fqm]).send_fq1, name="threading-fq1")
-            t_fq1.setDaemon(True)
-            t_fq2 = threading.Thread(target=FQM(rule[Constant.fqm]).send_fq2, name="threading-fq2")
-            t_fq2.setDaemon(True)
-            t_fq1.start()
-            t_fq2.start()
-
-        # print("write success")
+            # t_fq1 = threading.Thread(target=FQM(rule[Constant.fqm]).send_fq1, name="threading-fq1")
+            # t_fq1.setDaemon(True)
+            # t_fq2 = threading.Thread(target=FQM(rule[Constant.fqm]).send_fq2, name="threading-fq2")
+            # t_fq2.setDaemon(True)
+            # t_fq1.start()
+            # t_fq2.start()
 
     def read(self):
         rule = self.rule
@@ -496,13 +507,6 @@ class StartUp:
             for i in range(2):
                 self.canm.send_can(can_id=can_id, can_data="0000000000000000")
                 time.sleep(0.1)
-
-    # 启动im218模块
-    def start_im218(self):
-        self.canm.send_can(can_id=0x040, can_data="01")
-        time.sleep(0.5)
-        self.canm.send_can(can_id=0x040, can_data="07")
-        time.sleep(0.5)
 
 
 # 获取串码
@@ -558,94 +562,101 @@ def get_serial_code(meter="IC216", canm=None):
 # 运行测试程序
 def run():
     start_time = time.time()
-    # try:
-    check_rule = RuleConfig.rule_ic216
-    if Constant.check_meter == Constant.IC_216:
-        check_rule = RuleConfig.rule_ic216
-        print("检测IC216")
-    elif Constant.check_meter == Constant.IC_218:
-        check_rule = RuleConfig.rule_ic218
-        print("检测IC218")
-    elif Constant.check_meter == Constant.IM_218:
-        check_rule = RuleConfig.rule_im218
-        print("检测IM218")
-    elif Constant.check_meter == Constant.IM_228:
-        check_rule = RuleConfig.rule_im228
-        print("检测IM228")
-    json_rule = json.loads(check_rule)
+    try:
+        while True:
+            print("\r\nPress Enter Start Testing:")
+            input()
 
-    # 电源
-    if Constant.pcm in json_rule:
-        PCM.batch_switch(json_rule[Constant.pcm]['data'])
-        time.sleep(0.5)
+            Common.can_recv_dict = {}
+            Common.uds_recv_dict = {}
 
-    canm = CanM()   # 初始化can
+            check_rule = RuleConfig.rule_ic216
+            if Constant.check_meter == Constant.IC_216:
+                check_rule = RuleConfig.rule_ic216
+                print("检测IC216")
+            elif Constant.check_meter == Constant.IC_218:
+                check_rule = RuleConfig.rule_ic218
+                print("检测IC218")
+            elif Constant.check_meter == Constant.IM_218:
+                check_rule = RuleConfig.rule_im218
+                print("检测IM218")
+            elif Constant.check_meter == Constant.IM_228:
+                check_rule = RuleConfig.rule_im228
+                print("检测IM228")
+            json_rule = json.loads(check_rule)
 
-    serial_code = ""
-    # serial_code = get_serial_code(meter=Constant.check_meter, canm=canm)
-    # print("serial_code:", serial_code)
+            # 电源
+            if Constant.pcm in json_rule:
+                PCM.batch_switch(json_rule[Constant.pcm]['data'])
+                time.sleep(0.5)
 
-    # 开始检测
-    # pyb.LED(4).on()
-    root_list = json_rule['ROOT']
-    for root in root_list:
-        if len(Common.error_record) > 0:
-            break
-        describe = root['describe']
-        run_count = int(root['runCount'])
-        delay = int(root['delay'])/1000.0
-        global unitDelay
-        unitDelay = int(root['unitDelay'])/1000.0
-        for i in range(1, run_count+1):
-            if len(Common.error_record) > 0:
-                break
-            print("\r\n%s 第%s次" % (describe, i))
+            # 等待启动
+            while True:
+                check_id = 0x380 + Common.can_addr
+                if check_id in Common.can_recv_dict:
+                    time.sleep(1)
+                    break
 
-            rule_list = root['ruleList']
-            for rule in rule_list:
-                us = uds_server.UdsServer()  # 初始化uds服务
-                start_up = StartUp(rule=rule, canm=canm, us=us)
-                start_up.reset()
-                start_up.write()
-                # if Constant.can in rule:
-                #     time.sleep(3)
-                start_up.read()
-                # time.sleep(30*60)
-                start_up.reset()
-                us.close()  # 关闭uds服务
+            canm = CanM()   # 初始化can
+            serial_code = ""
+            # serial_code = get_serial_code(meter=Constant.check_meter, canm=canm)
+            # print("serial_code:", serial_code)
+
+            # 开始检测
+            root_list = json_rule['ROOT']
+            for root in root_list:
                 if len(Common.error_record) > 0:
                     break
-            time.sleep(delay)
+                describe = root['describe']
+                run_count = int(root['runCount'])
+                delay = int(root['delay'])/1000.0
+                global unitDelay
+                unitDelay = int(root['unitDelay'])/1000.0
+                for i in range(1, run_count+1):
+                    if len(Common.error_record) > 0:
+                        break
 
-    # pyb.LED(4).off()
-    if len(Common.error_record) > 0:
-        # pyb.LED(2).on()  # 红灯有异常
-        log_msg = "检测未通过, 错误位置:\r\n"
-        if "Can" in Common.error_record:
-            # pyb.LED(1).on()
-            # pyb.LED(2).on()
-            log_msg += "Can连接异常"
-        elif Constant.log_model:
-            for e in sorted(Common.error_record.items()):
-                key = e[0]
-                val = e[1]
-                log_msg += "%s %s\r\n" % (key, val)
-        else:
-            for e in sorted(Common.error_record.items()):
-                key = e[0]
-                val = e[1]
-                if key in Constant.check_terminal_dict:
-                    log_msg += "%s %s\r\n" % (Constant.check_terminal_dict[key], val)
-    else:
-        # pyb.LED(1).on()  # 绿灯正常
-        log_msg = "检测通过"
-    Log(serial_code).empty_log()   # 清空日志文件
-    Log(serial_code).write_log(content=log_msg)
-    # except Exception as e:
-    #     # pyb.LED(4).off()
-    #     # pyb.LED(2).on()  # 红灯有异常
-    #     print(e)
-    print("check completed %ss" % int(time.time()-start_time))
+                    # 获取实时温度
+                    us = uds_server.UdsServer(can_bus=canm.can_bus)
+                    tem = Tem(us=us).get_tem()
+                    us.close()
+                    print("\r\n%s 第%s次 温度%s℃" % (describe, i, tem))
+
+                    rule_list = root['ruleList']
+                    for rule in rule_list:
+                        start_up = StartUp(rule=rule, canm=canm)
+                        start_up.reset()
+                        start_up.write()
+                        start_up.read()
+                        # time.sleep(20)
+                        start_up.reset()
+                        if len(Common.error_record) > 0:
+                            break
+                    time.sleep(delay)
+
+            if len(Common.error_record) > 0:
+                log_msg = "The test failed, 错误位置:\r\n"
+                if "Can" in Common.error_record:
+                    log_msg += "Can连接异常"
+                elif Constant.log_model:
+                    for e in sorted(Common.error_record.items()):
+                        key = e[0]
+                        val = e[1]
+                        log_msg += "%s %s\r\n" % (key, val)
+                else:
+                    for e in sorted(Common.error_record.items()):
+                        key = e[0]
+                        val = e[1]
+                        if key in Constant.check_terminal_dict:
+                            log_msg += "%s %s\r\n" % (Constant.check_terminal_dict[key], val)
+            else:
+                log_msg = "The test successfully"
+            Log(serial_code).empty_log()   # 清空日志文件
+            Log(serial_code).write_log(content=log_msg)
+            PCM(Constant.vb).pin_off()
+            print("check completed %ss" % int(time.time()-start_time))
+    except Exception as e:
+        print(e)
 
 
 def start_thread():

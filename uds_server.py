@@ -10,10 +10,7 @@ from config import Common
 
 # uds交互服务
 class UdsServer:
-    def __init__(self):
-        can.rc['interface'] = 'socketcan'
-        can.rc['channel'] = 'can0'
-        can_bus = can.interface.Bus()
+    def __init__(self, can_bus=None):
         id_source = int("0x0CDA%02XF1" % Common.can_addr, 16)
         id_target = int("0x0CDAF1%02X" % Common.can_addr, 16)
         # print("id_source:", hex(id_source), "id_target:", hex(id_target), "can_addr:", Common.can_addr)
@@ -37,8 +34,8 @@ class UdsServer:
 
 
 # if __name__ == "__main__":
-#     Common.can_addr = 5
+#     Common.can_addr = int(sys.argv[1])
 #     us = UdsServer()
-#     get_res = us.send(sys.argv[1])
+#     get_res = us.send(sys.argv[2])
 #     mio_val = struct.unpack(">I", get_res[3:7])[0]
 #     print('---', mio_val)
