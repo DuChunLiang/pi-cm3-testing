@@ -6,6 +6,7 @@ import time
 import spidev
 import can
 import json
+import binascii
 import uds_server
 from convert import Convert
 from config import Constant, Common, RuleConfig
@@ -13,6 +14,7 @@ from validate import Validate, ValidateDataOp
 import RPi.GPIO as GPIO
 import threading
 import struct
+import mysql_service
 
 
 GPIO.setmode(GPIO.BCM)      # 使用BCM引还脚编号，此外有 GPIO.BOARD
@@ -559,6 +561,23 @@ def get_serial_code(meter="IC216", canm=None):
     return serial_code
 
 
+# 获取im218设备唯一编码
+def get_im218_device_id(canm=None):
+    device_id = ""
+    us = uds_server.UdsServer(can_bus=canm.can_bus)
+    try:
+        iap_info = Convert.bytes_to_hexstr(us.send("22F181"))[6:]
+        bsp_info = Convert.bytes_to_hexstr(us.send("22FD05"))[6:]
+        if len(iap_info) > 0:
+            device_id += iap_info
+        if len(bsp_info) > 0:
+            device_id += bsp_info
+    except Exception as e:
+        print(e)
+    us.close()
+    return device_id
+
+
 # 运行测试程序
 def run():
     start_time = time.time()
@@ -598,23 +617,29 @@ def run():
                     break
 
             canm = CanM()   # 初始化can
-            serial_code = ""
-            # serial_code = get_serial_code(meter=Constant.check_meter, canm=canm)
-            # print("serial_code:", serial_code)
+            tr = mysql_service.TestReport()  # 初始化添加测试报文服务
+            if Constant.check_meter == Constant.IM_218:
+                serial_code = get_im218_device_id(canm=canm)
+            else:
+                serial_code = get_serial_code(meter=Constant.check_meter, canm=canm)
+            print("serial_code:", serial_code)
+
+            # 添加测试报告主表信息
+            report_id = tr.inset_report(device_id=serial_code, device_name=Constant.check_meter)
 
             # 开始检测
             root_list = json_rule['ROOT']
             for root in root_list:
-                if len(Common.error_record) > 0:
-                    break
+                # if len(Common.error_record) > 0:
+                #     break
                 describe = root['describe']
                 run_count = int(root['runCount'])
                 delay = int(root['delay'])/1000.0
                 global unitDelay
                 unitDelay = int(root['unitDelay'])/1000.0
                 for i in range(1, run_count+1):
-                    if len(Common.error_record) > 0:
-                        break
+                    # if len(Common.error_record) > 0:
+                    #     break
 
                     # 获取实时温度
                     us = uds_server.UdsServer(can_bus=canm.can_bus)
@@ -630,9 +655,16 @@ def run():
                         start_up.read()
                         # time.sleep(20)
                         start_up.reset()
-                        if len(Common.error_record) > 0:
-                            break
+                        # if len(Common.error_record) > 0:
+                        #     break
                     time.sleep(delay)
+
+                    # 添加测试报告详细信息
+                    test_unit_name = "%s 第%s次" % (describe, i)
+                    tr.insert_report_detail(report_id=report_id, temperature=tem,
+                                            test_unit_name=test_unit_name)
+                    Common.test_report = ""
+                    Common.test_error_report = ""
 
             if len(Common.error_record) > 0:
                 log_msg = "The test failed, 错误位置:\r\n"
@@ -651,10 +683,17 @@ def run():
                             log_msg += "%s %s\r\n" % (Constant.check_terminal_dict[key], val)
             else:
                 log_msg = "The test successfully"
+
             Log(serial_code).empty_log()   # 清空日志文件
             Log(serial_code).write_log(content=log_msg)
             PCM(Constant.vb).pin_off()
-            print("check completed %ss" % int(time.time()-start_time))
+            PCM(Constant.vb1).pin_off()
+            PCM(Constant.vb2).pin_off()
+
+            test_time = int(time.time()-start_time)
+            print("check completed %ss" % test_time)
+            # 更新测试耗时时间
+            tr.update_test_time(report_id=report_id, test_time=test_time)
     except Exception as e:
         print(e)
 

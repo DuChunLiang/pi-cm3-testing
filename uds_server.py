@@ -6,6 +6,7 @@ import time
 import struct
 from udstools import IsoTp
 from config import Common
+import binascii
 
 
 # uds交互服务
@@ -35,7 +36,13 @@ class UdsServer:
 
 # if __name__ == "__main__":
 #     Common.can_addr = int(sys.argv[1])
-#     us = UdsServer()
+#
+#     can.rc['interface'] = 'socketcan'
+#     can.rc['channel'] = 'can0'
+#     can_bus = can.interface.Bus()
+#     us = UdsServer(can_bus=can_bus)
+#
 #     get_res = us.send(sys.argv[2])
-#     mio_val = struct.unpack(">I", get_res[3:7])[0]
-#     print('---', mio_val)
+#     # mio_val = struct.unpack(">I", get_res[3:7])[0]
+#     print('---', get_res)
+#     print('---', get_res[3:])

@@ -11,6 +11,7 @@ class Validate:  # 验证
     def __init__(self):
         self.data_dict = {}
         self.error_dict = {}
+        self.report = {}
         self.meter = Constant.check_meter
         self.db = cantools.database.load_file('dbc/IM218.dbc')
         # self.data = b'\x55\x55\x55\x03\x00\x10\x00\x00'
@@ -65,7 +66,10 @@ class Validate:  # 验证
                     if ain1 < ain1_min or ain1 > ain1_max:
                         self.error_dict["AIN2"] = "%s[%s %s]" % (ain2, ain2_min, ain2_max)
 
-            # WK1和WK2测试
+                    self.report["AIN1"] = "%s[%s %s]" % (ain1, ain1_min, ain1_max)
+                    self.report["AIN2"] = "%s[%s %s]" % (ain2, ain2_min, ain2_max)
+
+                    # WK1和WK2测试
             if group_sign == '0004':
                 frame_id = 0x80 + al
                 if frame_id in Common.can_recv_dict:
@@ -85,6 +89,9 @@ class Validate:  # 验证
                     if wk2 < wk2_min or wk2 > wk2_max:
                         self.error_dict["wk2"] = "%s[%s %s]" % (wk2, wk2_min, wk2_max)
 
+                    self.report["WK1"] = "%s[%s %s]" % (wk1, wk1_min, wk1_max)
+                    self.report["wk2"] = "%s[%s %s]" % (wk2, wk2_min, wk2_max)
+
             # 2路频率测试
             if group_sign == '0007':
                 fq1 = 0
@@ -101,7 +108,10 @@ class Validate:  # 验证
                     self.error_dict["FQ1"] = "%s[%s %s]" % (fq1, fq1_range[0], fq1_range[1])
 
                 if fq2 < fq2_range[0] or fq2 > fq2_range[1]:
-                    self.error_dict["FQ1"] = "%s[%s %s]" % (fq2, fq2_range[0], fq2_range[1])
+                    self.error_dict["FQ2"] = "%s[%s %s]" % (fq2, fq2_range[0], fq2_range[1])
+
+                self.report["FQ1"] = "%s[%s %s]" % (fq1, fq1_range[0], fq1_range[1])
+                self.report["FQ2"] = "%s[%s %s]" % (fq2, fq2_range[0], fq2_range[1])
 
         # 从uds返回的报文中解析数据
         if len(Common.uds_recv_dict) > 0:
@@ -131,6 +141,8 @@ class Validate:  # 验证
                     if val < ran[0] or val > ran[1]:
                         self.error_dict[mouth] = "%s[%s %s]" % (val, ran[0], ran[1])
 
+                    self.report[mouth] = "%s[%s %s]" % (val, ran[0], ran[1])
+
                 # 8路AI测试
                 if group_sign == '0002':
                     index = int(mouth[2:])
@@ -139,15 +151,18 @@ class Validate:  # 验证
                     if index % 2 == 0:
                         if val < in_even[0] or val > in_even[1]:
                             self.error_dict[mouth] = "%s[%s %s]" % (val, in_even[0], in_even[1])
+                        self.report[mouth] = "%s[%s %s]" % (val, in_even[0], in_even[1])
                     else:
                         if val < in_odd[0] or val > in_odd[1]:
                             self.error_dict[mouth] = "%s[%s %s]" % (val, in_odd[0], in_odd[1])
+                        self.report[mouth] = "%s[%s %s]" % (val, in_odd[0], in_odd[1])
 
                 # 4路OUT1-OUT4测试
                 if group_sign == '0005':
                     out_ran = Common.can_val_range[mouth]
                     if val < out_ran[0] or val > out_ran[1]:
                         self.error_dict[mouth] = "%s[%s %s]" % (val, out_ran[0], out_ran[1])
+                    self.report[mouth] = "%s[%s %s]" % (val, out_ran[0], out_ran[1])
 
                 # 16路OUT5-OUT20测试
                 if group_sign == '0006':
@@ -157,13 +172,22 @@ class Validate:  # 验证
                     if index % 2 == 0:
                         if val < out_even[0] or val > out_even[1]:
                             self.error_dict[mouth] = "%s[%s %s]" % (val, out_even[0], out_even[1])
+                        self.report[mouth] = "%s[%s %s]" % (val, out_even[0], out_even[1])
                     else:
                         if val < out_odd[0] or val > out_odd[1]:
                             self.error_dict[mouth] = "%s[%s %s]" % (val, out_odd[0], out_odd[1])
+                        self.report[mouth] = "%s[%s %s]" % (val, out_odd[0], out_odd[1])
 
         if len(self.error_dict) > 0:
             print("validate:", self.error_dict.__str__())
-        # Common.error_record.update(self.error_dict)
+            for e in self.error_dict.items():
+                Common.test_error_report += "%s_%s," % (e[0], e[1])
+
+        Common.error_record.update(self.error_dict)
+
+        if len(self.report) > 0:
+            for r in self.report.items():
+                Common.test_report += "%s_%s," % (r[0], r[1])
 
     # IC218测试检测
     def validate_ic216(self, frame_id=None, data="", sign="0004_2"):
